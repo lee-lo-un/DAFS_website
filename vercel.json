@@ -1,4 +1,4 @@
 {
-  "crons": [],
-  "buildCommand": "corepack enable pnpm && pnpm install --no-frozen-lockfile && pnpm build"
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install --no-frozen-lockfile"
 }

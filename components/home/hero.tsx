@@ -34,7 +34,7 @@ const Hero = () => {
               />
             </div>
             <div>
-              <p className="text-xl md:text-2xl font-medium mb-0 text-foreground dark:text-black">
+              <p className="font-extrabold text-xl md:text-3xl mb-0 text-amber-500 dark:text-amber-400">
                 명당의 도(道)
               </p>
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 text-foreground dark:text-black">
