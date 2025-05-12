@@ -104,12 +104,14 @@ export default function ContactPage() {
     // 메시지 생성
     const message = `
 🌿 풍수 상담 신청서
+
 📌 이름: ${formData.name}
 📧 이메일: ${formData.email}
 📱 연락처: ${formData.phone}
 🔮 서비스 종류: ${serviceTypeText}
 💼 상담 패키지: ${packageTypeText}
 📅 희망 상담일: ${formattedDate}
+
 📝 문의 내용:
 ${formData.message}
 `.trim();
@@ -254,7 +256,14 @@ ${formData.message}
                   <CardHeader>
                     <CardTitle>상담 신청</CardTitle>
                     <CardDescription>
-                      아래 양식을 작성하여 상담을 신청해 주세요.
+                      <div>아래 양식을 작성하여 상담을 신청해 주세요.</div>
+                      <div>
+                        신청버튼 누르시면 작성된 내용양식이 자동 복사가 됩니다.
+                      </div>
+                      <div>
+                        연결된 카카오톡 채팅창에 붙여넣기(Ctrl+V)해 주시면
+                        됩니다.
+                      </div>
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
