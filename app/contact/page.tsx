@@ -42,8 +42,9 @@ export default function ContactPage() {
     email: "",
     phone: "",
     serviceType: defaultPackage || "residential",
+    otherServiceType: "",
     packageType: defaultPackage || "basic",
-    date: undefined as Date | undefined,
+    date: new Date(), // 오늘 날짜를 기본값으로 설정
     message: "",
   });
 
@@ -61,13 +62,75 @@ export default function ContactPage() {
   };
 
   const handleDateChange = (date: Date | undefined) => {
-    setFormData((prev) => ({ ...prev, date }));
+    if (date) {
+      setFormData((prev) => ({ ...prev, date }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // 카카오 채널로 리디렉션
     window.open("http://pf.kakao.com/_xaxjNBn", "_blank");
+  };
+
+  const handleConsultToKakao = () => {
+    // 서비스 종류 처리 (기타 옵션 포함)
+    let serviceTypeText = "";
+    if (formData.serviceType === "residential") {
+      serviceTypeText = "주거 풍수";
+    } else if (formData.serviceType === "office") {
+      serviceTypeText = "사무실 풍수";
+    } else if (formData.serviceType === "grave") {
+      serviceTypeText = "묘지 풍수";
+    } else if (formData.serviceType === "other") {
+      serviceTypeText = `기타 (${formData.otherServiceType})`;
+    }
+
+    // 패키지 종류 처리
+    let packageTypeText = "";
+    if (formData.packageType === "basic") {
+      packageTypeText = "기본 상담 (₩150,000 ~ ₩300,000)";
+    } else if (formData.packageType === "premium") {
+      packageTypeText = "프리미엄 상담 (₩500,000 ~ ₩800,000)";
+    } else if (formData.packageType === "vip") {
+      packageTypeText = "VIP 상담";
+    }
+
+    // 날짜 포맷팅
+    const formattedDate = formData.date
+      ? format(formData.date, "yyyy년 MM월 dd일")
+      : "";
+
+    // 메시지 생성
+    const message = `
+🌿 풍수 상담 신청서
+📌 이름: ${formData.name}
+📧 이메일: ${formData.email}
+📱 연락처: ${formData.phone}
+🔮 서비스 종류: ${serviceTypeText}
+💼 상담 패키지: ${packageTypeText}
+📅 희망 상담일: ${formattedDate}
+📝 문의 내용:
+${formData.message}
+`.trim();
+
+    // 메시지 복사
+    navigator.clipboard
+      .writeText(message)
+      .then(() => {
+        // 안내 후 카카오톡 채팅창 열기
+        alert(
+          "✅ 상담 신청 내용이 복사되었습니다.\n카카오톡 채팅창에 붙여넣어 주세요!"
+        );
+        window.open("https://pf.kakao.com/_xaxjNBn/chat", "_blank");
+      })
+      .catch((err) => {
+        console.error("클립보드 복사 실패:", err);
+        alert(
+          "상담 내용 복사에 실패했습니다. 카카오톡 채팅창에서 직접 내용을 작성해주세요."
+        );
+        window.open("https://pf.kakao.com/_xaxjNBn/chat", "_blank");
+      });
   };
 
   return (
@@ -241,7 +304,7 @@ export default function ContactPage() {
                             onValueChange={(value) =>
                               handleSelectChange("serviceType", value)
                             }
-                            className="grid grid-cols-3 gap-4"
+                            className="grid grid-cols-2 gap-4"
                           >
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem
@@ -258,7 +321,24 @@ export default function ContactPage() {
                               <RadioGroupItem value="grave" id="grave" />
                               <Label htmlFor="grave">묘지 풍수</Label>
                             </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="other" id="other" />
+                              <Label htmlFor="other">기타</Label>
+                            </div>
                           </RadioGroup>
+
+                          {formData.serviceType === "other" && (
+                            <div className="mt-2">
+                              <Input
+                                id="otherServiceType"
+                                name="otherServiceType"
+                                placeholder="서비스 종류를 입력해주세요"
+                                value={formData.otherServiceType}
+                                onChange={handleChange}
+                                required={formData.serviceType === "other"}
+                              />
+                            </div>
+                          )}
                         </div>
 
                         <div className="space-y-2">
@@ -274,14 +354,12 @@ export default function ContactPage() {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="basic">
-                                기본 상담 (₩150,000)
+                                기본 상담 (₩150,000 ~ ₩300,000)
                               </SelectItem>
                               <SelectItem value="premium">
-                                프리미엄 상담 (₩300,000)
+                                프리미엄 상담 (₩500,000 ~ ₩800,000)
                               </SelectItem>
-                              <SelectItem value="vip">
-                                VIP 상담 (₩500,000)
-                              </SelectItem>
+                              <SelectItem value="vip">VIP 상담</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -330,12 +408,7 @@ export default function ContactPage() {
                       <Button
                         type="button"
                         className="w-full"
-                        onClick={() =>
-                          window.open(
-                            "http://pf.kakao.com/_xaxjNBn/chat",
-                            "_blank"
-                          )
-                        }
+                        onClick={handleConsultToKakao}
                       >
                         카카오톡으로 상담 신청하기
                       </Button>
