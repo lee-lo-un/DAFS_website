@@ -46,7 +46,7 @@ export default function AdminAuthCheck({
         console.log("2. 세션 확인 중...");
         const { data: sessionData, error: sessionError } =
           await supabase.auth.getSession();
-        
+
         console.log("2-1. 세션 데이터:", sessionData);
 
         if (sessionError) {
@@ -66,11 +66,11 @@ export default function AdminAuthCheck({
           setIsLoading(false);
           return;
         }
-        
+
         const userId = sessionData.session.user.id;
         console.log("✅ 2-O. 세션 확인 성공:", {
           userId,
-          email: sessionData.session.user.email
+          email: sessionData.session.user.email,
         });
 
         debug += `✅ 세션 확인 성공: ${userId}\n`;
@@ -78,20 +78,25 @@ export default function AdminAuthCheck({
         // 관리자 권한 확인
         debug += "관리자 권한 확인 중...\n";
         console.log("3. 관리자 권한 확인 중...");
-        
+
         try {
           // profiles 테이블 체크
           console.log("3-1. profiles 테이블 확인");
-          const { data: allProfiles, error: tableError } = await supabase.from("profiles").select("*").limit(1);
+          const { data: allProfiles, error: tableError } = await supabase
+            .from("profiles")
+            .select("*")
+            .limit(1);
           if (tableError) {
             console.error("❌ 3-X. profiles 테이블 없음:", tableError);
           } else {
-            console.log("✅ 3-O. profiles 테이블 확인 성공:", { sampleProfile: allProfiles[0] });
+            console.log("✅ 3-O. profiles 테이블 확인 성공:", {
+              sampleProfile: allProfiles[0],
+            });
           }
         } catch (tableCheckError) {
           console.error("❌ 3-X. 테이블 확인 중 오류:", tableCheckError);
         }
-        
+
         // 현재 사용자 프로필 조회
         console.log("3-2. 현재 사용자 프로필 조회 시도");
         const { data: profile, error: profileError } = await supabase
@@ -105,15 +110,16 @@ export default function AdminAuthCheck({
           console.error("❌ 3-X. 프로필 조회 오류:", {
             error: profileError,
             code: profileError.code,
-            userId
+            userId,
           });
-          
+
           // 추가 오류 진단
-          if (profileError.code === "PGRST116") {  // 데이터 없음
+          if (profileError.code === "PGRST116") {
+            // 데이터 없음
             debug += "❌ 사용자 프로필이 존재하지 않습니다\n";
             console.log("❌ 3-X. 사용자 프로필이 존재하지 않음");
           }
-          
+
           setError("프로필 정보를 가져오는 중 오류가 발생했습니다");
           setDebugInfo(debug);
           setIsLoading(false);

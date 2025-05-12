@@ -100,11 +100,12 @@ const Header = () => {
         console.log("사용자 ID:", userData.user.id);
 
         // 관리자 권한 확인 - 타임아웃 설정
+        // single() 대신 maybeSingle()을 사용하여 데이터가 없을 경우 오류 대신 null 반환
         const profilePromise = supabase
           .from("profiles")
           .select("is_admin")
           .eq("id", userData.user.id)
-          .single();
+          .maybeSingle();
 
         // Promise.race를 사용하여 프로필 쿼리에 5초 타임아웃 적용
         const profileTimeoutPromise = new Promise((_, reject) => {
@@ -222,11 +223,13 @@ const Header = () => {
                 isScrolled
                   ? cn(
                       "text-foreground/80 hover:text-foreground hover:bg-gray-100",
-                      isActive("/experts") && "text-foreground font-semibold bg-primary/10 text-primary"
+                      isActive("/experts") &&
+                        "text-foreground font-semibold bg-primary/10 text-primary"
                     )
                   : cn(
                       "text-white/80 hover:text-white hover:bg-white/10",
-                      isActive("/experts") && "text-white font-semibold bg-white/20"
+                      isActive("/experts") &&
+                        "text-white font-semibold bg-white/20"
                     )
               )}
             >
@@ -239,11 +242,13 @@ const Header = () => {
                 isScrolled
                   ? cn(
                       "text-foreground/80 hover:text-foreground hover:bg-gray-100",
-                      isActive("/services") && "text-foreground font-semibold bg-primary/10 text-primary"
+                      isActive("/services") &&
+                        "text-foreground font-semibold bg-primary/10 text-primary"
                     )
                   : cn(
                       "text-white/80 hover:text-white hover:bg-white/10",
-                      isActive("/services") && "text-white font-semibold bg-white/20"
+                      isActive("/services") &&
+                        "text-white font-semibold bg-white/20"
                     )
               )}
             >
@@ -256,11 +261,13 @@ const Header = () => {
                 isScrolled
                   ? cn(
                       "text-foreground/80 hover:text-foreground hover:bg-gray-100",
-                      isActive("/blog") && "text-foreground font-semibold bg-primary/10 text-primary"
+                      isActive("/blog") &&
+                        "text-foreground font-semibold bg-primary/10 text-primary"
                     )
                   : cn(
                       "text-white/80 hover:text-white hover:bg-white/10",
-                      isActive("/blog") && "text-white font-semibold bg-white/20"
+                      isActive("/blog") &&
+                        "text-white font-semibold bg-white/20"
                     )
               )}
             >
@@ -273,11 +280,13 @@ const Header = () => {
                 isScrolled
                   ? cn(
                       "text-foreground/80 hover:text-foreground hover:bg-gray-100",
-                      isActive("/courses") && "text-foreground font-semibold bg-primary/10 text-primary"
+                      isActive("/courses") &&
+                        "text-foreground font-semibold bg-primary/10 text-primary"
                     )
                   : cn(
                       "text-white/80 hover:text-white hover:bg-white/10",
-                      isActive("/courses") && "text-white font-semibold bg-white/20"
+                      isActive("/courses") &&
+                        "text-white font-semibold bg-white/20"
                     )
               )}
             >
@@ -290,11 +299,13 @@ const Header = () => {
                 isScrolled
                   ? cn(
                       "text-foreground/80 hover:text-foreground hover:bg-gray-100",
-                      isActive("/notices") && "text-foreground font-semibold bg-primary/10 text-primary"
+                      isActive("/notices") &&
+                        "text-foreground font-semibold bg-primary/10 text-primary"
                     )
                   : cn(
                       "text-white/80 hover:text-white hover:bg-white/10",
-                      isActive("/notices") && "text-white font-semibold bg-white/20"
+                      isActive("/notices") &&
+                        "text-white font-semibold bg-white/20"
                     )
               )}
             >
@@ -307,7 +318,8 @@ const Header = () => {
                 isScrolled
                   ? cn(
                       "text-foreground/80 hover:text-foreground hover:bg-gray-100",
-                      isActive("/qna") && "text-foreground font-semibold bg-primary/10 text-primary"
+                      isActive("/qna") &&
+                        "text-foreground font-semibold bg-primary/10 text-primary"
                     )
                   : cn(
                       "text-white/80 hover:text-white hover:bg-white/10",
@@ -324,11 +336,13 @@ const Header = () => {
                 isScrolled
                   ? cn(
                       "text-foreground/80 hover:text-foreground hover:bg-gray-100",
-                      isActive("/location") && "text-foreground font-semibold bg-primary/10 text-primary"
+                      isActive("/location") &&
+                        "text-foreground font-semibold bg-primary/10 text-primary"
                     )
                   : cn(
                       "text-white/80 hover:text-white hover:bg-white/10",
-                      isActive("/location") && "text-white font-semibold bg-white/20"
+                      isActive("/location") &&
+                        "text-white font-semibold bg-white/20"
                     )
               )}
             >

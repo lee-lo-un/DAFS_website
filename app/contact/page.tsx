@@ -67,7 +67,7 @@ export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // 카카오 채널로 리디렉션
-    window.open('http://pf.kakao.com/_xaxjNBn', '_blank');
+    window.open("http://pf.kakao.com/_xaxjNBn", "_blank");
   };
 
   return (
@@ -91,10 +91,16 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
               <h2 className="text-3xl font-bold mb-6">문의하기</h2>
-              <p className="text-foreground/70 mb-8">
-                상담 신청 또는 문의 사항이 있으시면 아래 양식을 작성해 주세요.
-                빠른 시일 내에 답변 드리겠습니다.
-              </p>
+              <div className="text-foreground/70 mb-8">
+                <div>
+                  상담 또는 문의 사항이 있으시면 전화나 문자로 연락을 주시거나
+                  카카오톡으로 연락해주시기 바랍니다.
+                </div>
+                <div>
+                  카카오톡 연락시에는 연락처와 성함을 남겨주시면 빠른 시일 내에
+                  연락 드리겠습니다.
+                </div>
+              </div>
 
               <div className="space-y-6">
                 <div className="flex items-start">
@@ -321,7 +327,16 @@ export default function ContactPage() {
                         </div>
                       </div>
 
-                      <Button type="button" className="w-full" onClick={() => window.open('http://pf.kakao.com/_xaxjNBn', '_blank')}>
+                      <Button
+                        type="button"
+                        className="w-full"
+                        onClick={() =>
+                          window.open(
+                            "http://pf.kakao.com/_xaxjNBn/chat",
+                            "_blank"
+                          )
+                        }
+                      >
                         카카오톡으로 상담 신청하기
                       </Button>
                     </form>

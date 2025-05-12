@@ -475,130 +475,148 @@ export default async function ServicesPage() {
       <section className="py-16 px-4 md:px-8 bg-muted">
         <div className="container-width">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground dark:text-white">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground dark:text-white">
               상담 비용 안내
             </h2>
             <p className="text-foreground/70 dark:text-gray-300 max-w-2xl mx-auto">
-              다양한 니즈에 맞춘 합리적인 상담 패키지를 제공합니다.
+              다양한 니즈에 맞춤 합리적인 상담 패키지를 제공합니다.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* 기본 상담 */}
-            <Card className="border-2 border-border hover:border-primary/30 transition-all duration-300">
-              <CardHeader>
-                <CardTitle>기본 상담</CardTitle>
-                <CardDescription>
-                  간단한 풍수 분석이 필요한 분들을 위한 패키지
-                </CardDescription>
-                <div className="mt-4">
-                  <span className="text-3xl font-bold">₩150,000</span>
-                  <span className="text-muted-foreground ml-2">/ 회</span>
+            {/* 기본 문의 및 출장 */}
+            <Card className="border-2 border-border hover:border-primary/30 transition-all duration-300 p-6">
+              <div className="mb-6">
+                <h3 className="text-2xl md:text-3xl font-bold mb-2">
+                  기본 문의 및 출장
+                </h3>
+              </div>
+
+              <div className="mb-6">
+                <div className="font-bold mb-2">
+                  <p>● 고객의 상황에 대한 기본적인 사항과</p>
+                  <p className="ml-3">서비스가 필요한 내용 확인 및 출장</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>1시간 온라인 상담</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>기본 공간 분석</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>간단한 개선 방안 제시</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>이메일 보고서 제공</span>
-                  </li>
-                </ul>
-              </CardContent>
+
+                <div className="ml-4 mb-4">
+                  <p className="mb-1">
+                    ▶ 간단한 전화 상담
+                    <span className="text-blue-600 font-medium">(무료)</span>
+                  </p>
+                  <p className="mb-1">
+                    ▶ 현장 환경을 위한 출장비
+                    <span className="text-blue-600 font-medium">
+                      (실비 수준)
+                    </span>
+                  </p>
+                  <p className="mb-1">* 교통비, 식비, 숙박비 등</p>
+                  <p className="mb-1">▶ 현장 탑색, 분석, 현황 설명, 방안제시</p>
+                  <p className="mb-1">
+                    - 소요 시간{" "}
+                    <span className="text-blue-600 font-medium">1시간</span>{" "}
+                    이내:{" "}
+                    <span className="text-blue-600 font-medium">150,000원</span>
+                  </p>
+                  <p className="mb-1">
+                    - 소요 시간{" "}
+                    <span className="text-blue-600 font-medium">2시간</span>{" "}
+                    이내:{" "}
+                    <span className="text-blue-600 font-medium">300,000원</span>
+                  </p>
+                </div>
+
+                <p className="text-sm">→ 비용: 무료 또는 출장비 + 소요시간별</p>
+              </div>
             </Card>
 
             {/* 프리미엄 상담 */}
-            <Card className="border-2 border-primary relative">
-              <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-bl-lg">
+            <Card className="border-2 border-primary shadow-lg hover:shadow-primary/20 transition-all duration-300 p-6 relative">
+              <div className="absolute top-0 right-0 bg-primary text-white px-3 py-1 text-xs font-medium rounded-bl-lg rounded-tr-lg">
                 인기
               </div>
-              <CardHeader>
-                <CardTitle>프리미엄 상담</CardTitle>
-                <CardDescription>
-                  심층적인 풍수 분석과 맞춤형 솔루션이 필요한 분들을 위한 패키지
-                </CardDescription>
-                <div className="mt-4">
-                  <span className="text-3xl font-bold">₩300,000</span>
-                  <span className="text-muted-foreground ml-2">/ 회</span>
+
+              <div className="mb-6">
+                <h3 className="text-2xl md:text-3xl font-bold mb-2">
+                  프리미엄 상담
+                </h3>
+              </div>
+
+              <div className="mb-6">
+                <div className="font-bold mb-2">
+                  <p>● 고객의 집, 묘, 사업장 등 종합적인 사항에</p>
+                  <p className="ml-3">대한 서비스 내용 확인 및 출장</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>2시간 방문 상담</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>심층 공간 분석</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>맞춤형 개선 방안 제시</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>상세 보고서 및 도면 제공</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>2주 이내 1회 추가 질문 가능</span>
-                  </li>
-                </ul>
-              </CardContent>
+
+                <div className="ml-4 mb-4">
+                  <p className="mb-1">
+                    ▶ 간단한 전화 상담
+                    <span className="text-blue-600 font-medium">(무료)</span>
+                  </p>
+                  <p className="mb-1">
+                    ▶ 현장 환경을 위한 출장비
+                    <span className="text-blue-600 font-medium">
+                      (실비 수준)
+                    </span>
+                  </p>
+                  <p className="mb-1">* 교통비, 식비, 숙박비 등</p>
+                  <p className="mb-1">▶ 현장 탑색, 분석, 현황 설명, 방안제시</p>
+                  <p className="mb-1">
+                    - 소요 시간{" "}
+                    <span className="text-blue-600 font-medium">3시간</span>{" "}
+                    이내:{" "}
+                    <span className="text-blue-600 font-medium">500,000원</span>
+                  </p>
+                  <p className="mb-1">
+                    - 소요 시간{" "}
+                    <span className="text-blue-600 font-medium">4시간</span>{" "}
+                    이내:{" "}
+                    <span className="text-blue-600 font-medium">600,000원</span>
+                  </p>
+                  <p className="mb-1">
+                    - 소요 시간{" "}
+                    <span className="text-blue-600 font-medium">5시간</span>{" "}
+                    이내:{" "}
+                    <span className="text-blue-600 font-medium">700,000원</span>
+                  </p>
+                  <p className="mb-1">
+                    - 소요 시간{" "}
+                    <span className="text-blue-600 font-medium">6시간</span>{" "}
+                    이내:{" "}
+                    <span className="text-blue-600 font-medium">800,000원</span>
+                  </p>
+                </div>
+
+                <p className="text-sm">→ 비용: 무료 또는 출장비 + 소요시간별</p>
+              </div>
             </Card>
 
             {/* VIP 상담 */}
-            <Card className="border-2 border-border hover:border-primary/30 transition-all duration-300">
-              <CardHeader>
-                <CardTitle>VIP 상담</CardTitle>
-                <CardDescription>
-                  장기적인 관리와 지속적인 컨설팅이 필요한 분들을 위한 패키지
-                </CardDescription>
-                <div className="mt-4">
-                  <span className="text-3xl font-bold">₩500,000</span>
-                  <span className="text-muted-foreground ml-2">/ 회</span>
+            <Card className="border-2 border-border hover:border-primary/30 transition-all duration-300 p-6">
+              <div className="mb-6">
+                <h3 className="text-2xl md:text-3xl font-bold mb-2">
+                  VIP 상담
+                </h3>
+              </div>
+
+              <div className="mb-6">
+                <div className="font-bold mb-2">
+                  <p>● 고객의 집/묘/사업장 등 종합적인 판단과</p>
+                  <p className="ml-3 text-blue-600 font-medium">
+                    명당 발굴 및 점혈
+                  </p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>3시간 방문 상담</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>전문가 팀 심층 분석</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>단계별 개선 계획 수립</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>프리미엄 보고서 및 3D 시뮬레이션</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>1개월 이내 무제한 질문 가능</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Check className="mr-2 h-5 w-5 text-primary mt-0.5" />
-                    <span>6개월 후 무료 재점검 1회</span>
-                  </li>
-                </ul>
-              </CardContent>
+
+                <div className="ml-4 mb-4">
+                  <p className="mb-1">▶ 수요 발생 시 수시 상담 및 자문</p>
+                  <p className="mb-1">▶ 단체 및 기관 특강, 세미나</p>
+                  <p className="mb-1">▶ 장거리 1일 이상 소요 출장 필요</p>
+                </div>
+
+                <p className="text-sm">
+                  → 비용:{" "}
+                  <span className="text-blue-600 font-medium">상호 협의</span>
+                </p>
+              </div>
             </Card>
           </div>
 

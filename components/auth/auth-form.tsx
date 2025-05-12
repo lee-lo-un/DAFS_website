@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2 } from "lucide-react"
+import Link from "next/link"
 
 export default function AuthForm() {
   const { toast } = useToast()
@@ -19,7 +20,10 @@ export default function AuthForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [emailError, setEmailError] = useState<string | null>(null)
   const [loginError, setLoginError] = useState("")
+  const [resetEmailSent, setResetEmailSent] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isMounted = useRef(true)
 
@@ -43,6 +47,111 @@ export default function AuthForm() {
       }
     }
   }, [])
+  
+  // 인증 이메일 재발송 함수
+  const handleResendConfirmation = async () => {
+    // 이메일 필드가 비어있는지 확인
+    if (!email) {
+      setEmailError("인증 이메일을 발송할 이메일 주소를 입력해주세요.");
+      return;
+    }
+    
+    setIsLoading(true);
+    setEmailError(null);
+    
+    const supabase = createSupabaseClient();
+    if (!supabase) {
+      toast({
+        title: "오류",
+        description: "인증 서비스에 연결할 수 없습니다.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "인증 이메일 재발송",
+        description: "인증 이메일이 재발송되었습니다. 이메일을 확인해주세요.",
+      });
+    } catch (error: any) {
+      console.error("인증 이메일 재발송 오류:", error);
+      toast({
+        title: "인증 이메일 재발송 실패",
+        description: error.message || "인증 이메일 재발송 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // 비밀번호 재설정 함수
+  const handleResetPassword = async () => {
+    // 이메일 필드가 비어있는지 확인
+    if (!email) {
+      setEmailError("비밀번호 재설정을 위해 이메일을 입력해주세요.");
+      toast({
+        title: "이메일 필요",
+        description: "비밀번호 찾기를 위해 이메일 주소를 먼저 입력해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    setEmailError(null);
+    setResetEmailSent(false);
+    
+    const supabase = createSupabaseClient();
+    if (!supabase) {
+      toast({
+        title: "오류",
+        description: "인증 서비스에 연결할 수 없습니다.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      setResetEmailSent(true);
+      toast({
+        title: "비밀번호 재설정 이메일 발송",
+        description: "비밀번호 재설정 링크가 이메일로 발송되었습니다. 이메일을 확인해주세요.",
+      });
+    } catch (error: any) {
+      console.error("비밀번호 재설정 오류:", error);
+      toast({
+        title: "비밀번호 재설정 실패",
+        description: error.message || "비밀번호 재설정 이메일 발송 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -119,10 +228,10 @@ export default function AuthForm() {
         return;
       } else {
         console.error("사용자 데이터 없음:", data)
-        throw new Error("로그인 중 알 수 없는 오류가 발생했습니다.")
+        throw new Error("로그인 처리 중 오류가 발생했습니다.")
       }
     } catch (error: any) {
-      console.error("Login error:", error)
+      console.error("로그인 오류 처리:", error)
 
       // 컴포넌트가 언마운트되었는지 확인
       if (!isMounted.current) return
@@ -133,32 +242,59 @@ export default function AuthForm() {
         timeoutRef.current = null
       }
 
-      // 로딩 상태 명확하게 해제
-      setIsLoading(false)
+      // 오류 메시지 처리
+      let errorMessage = "로그인 중 오류가 발생했습니다."
+      let isEmailNotConfirmed = false;
 
-      // 사용자 친화적인 오류 메시지 설정
-      if (error.message === "Invalid login credentials") {
-        setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.")
-      } else if (error.message?.includes("network") || error.message?.includes("fetch")) {
-        setLoginError("네트워크 연결 오류가 발생했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.")
-      } else {
-        setLoginError(error.message || "로그인 중 오류가 발생했습니다.")
+      if (error.message.includes("Invalid login credentials")) {
+        errorMessage = "이메일 또는 비밀번호가 올바르지 않습니다."
+      } else if (error.message.includes("Email not confirmed")) {
+        isEmailNotConfirmed = true;
+        errorMessage = "이메일 인증이 완료되지 않았습니다. 이메일을 확인해주세요."
       }
 
-      toast({
-        title: "로그인 실패",
-        description:
-          error.message === "Invalid login credentials"
-            ? "이메일 또는 비밀번호가 올바르지 않습니다."
-            : error.message || "로그인 중 오류가 발생했습니다.",
-        variant: "destructive",
-      })
+      setLoginError(errorMessage)
+      
+      if (isEmailNotConfirmed) {
+        toast({
+          title: "이메일 인증 필요",
+          description: (
+            <div>
+              <p>{errorMessage}</p>
+              <button 
+                onClick={() => handleResendConfirmation()} 
+                className="text-white underline mt-2"
+              >
+                인증 이메일 재발송
+              </button>
+            </div>
+          ),
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "로그인 실패",
+          description: errorMessage,
+          variant: "destructive",
+        })
+      }
+      
+      setIsLoading(false)
     }
   }
 
-  // 나머지 코드는 그대로 유지...
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // 오류 상태 초기화
+    setPasswordError(null)
+    setEmailError(null)
+
+    // 비밀번호 길이 검증
+    if (password.length < 6) {
+      setPasswordError("비밀번호는 최소 6자 이상이어야 합니다.")
+      return
+    }
 
     const supabase = createSupabaseClient()
     if (!supabase) {
@@ -186,17 +322,99 @@ export default function AuthForm() {
 
     try {
       console.log("회원가입 시도 중...")
+      console.log("이메일:", email, "비밀번호 길이:", password.length)
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
+      // 비밀번호 길이만 검사 (6자리 이상)
+      if (password.length < 6) {
+        setPasswordError("비밀번호는 최소 6자 이상이어야 합니다.");
+        setIsLoading(false);
+        return;
+      }
 
+      console.log("회원가입 요청 전송 중...", { email, passwordLength: password.length });
+      
+      // 비밀번호 정책 테스트를 위해 로그 추가
+      console.log("사용하는 비밀번호 정보:", {
+        length: password.length,
+        hasUpperCase: /[A-Z]/.test(password),
+        hasLowerCase: /[a-z]/.test(password),
+        hasNumber: /[0-9]/.test(password),
+        hasSpecialChar: /[^A-Za-z0-9]/.test(password)
+      });
+      
+      let signUpResult;
+      try {
+        // 요청 전송 전 옵션 로그
+        const signUpOptions = {
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        };
+        console.log("회원가입 요청 옵션:", { ...signUpOptions, password: "[HIDDEN]" });
+        
+        // Fetch API를 사용하여 직접 요청 보내기
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        
+        if (!supabaseUrl || !supabaseKey) {
+          throw new Error("Supabase URL 또는 Key가 없습니다.");
+        }
+        
+        // Supabase SDK 사용 (이메일 확인 없이 바로 로그인)
+        signUpResult = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: {
+              email_confirmed: true // 이메일 확인 없이 바로 로그인 가능하도록 설정
+            }
+          },
+        });
+        
+        console.log("회원가입 응답:", signUpResult);
+        
+        // 오류 처리
+        if (signUpResult.error) {
+          throw new Error(signUpResult.error.message || "회원가입 실패");
+        }
+        console.log("회원가입 성공:", signUpResult);
+      } catch (error: unknown) {
+        const signUpError = error as Error;
+        console.error("회원가입 오류 상세:", signUpError);
+        console.error("오류 내용:", signUpError.message);
+        
+        // 오류 객체에 response 프로퍼티가 있는지 확인
+        const errorWithResponse = error as { response?: any };
+        if (errorWithResponse.response) {
+          console.error("서버 응답:", errorWithResponse.response);
+        }
+        
+        // 컴포넌트가 언마운트되었는지 확인
+        if (!isMounted.current) return;
+        
+        // 타임아웃 정리
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
+        
+        toast({
+          title: "회원가입 실패",
+          description: (signUpError as Error).message || "회원가입 중 오류가 발생했습니다.",
+          variant: "destructive",
+        });
+        
+        setIsLoading(false);
+        return;
+      }
+      
       // 컴포넌트가 언마운트되었는지 확인
-      if (!isMounted.current) return
+      if (!isMounted.current) return;
+      
+      const { data, error } = signUpResult;
 
       console.log("회원가입 응답:", { success: !error, errorMessage: error?.message })
 
@@ -207,7 +425,16 @@ export default function AuthForm() {
       }
 
       if (error) {
-        throw error
+        // 오류 메시지 처리
+        if (error.message.includes("Password") || error.message.includes("password")) {
+          setPasswordError("비밀번호가 유효하지 않습니다. 최소 6자 이상의 강한 비밀번호를 사용해주세요.");
+        } else if (error.message.includes("email") || error.message.includes("Email") || error.message.includes("User already registered")) {
+          setEmailError("이미 사용 중인 이메일입니다. 다른 이메일 주소를 사용해주세요.");
+        } else {
+          throw error
+        }
+        setIsLoading(false)
+        return
       }
 
       toast({
@@ -215,6 +442,9 @@ export default function AuthForm() {
         description: "이메일 확인을 위한 링크가 발송되었습니다. 이메일을 확인해주세요.",
       })
 
+      // 회원가입 성공 후 폼 초기화
+      setEmail("")
+      setPassword("")
       setIsLoading(false)
     } catch (error: any) {
       console.error("Signup error:", error)
@@ -228,16 +458,39 @@ export default function AuthForm() {
         timeoutRef.current = null
       }
 
+      // 오류 메시지 한글화
+      let errorMessage = "회원가입 중 오류가 발생했습니다.";
+      console.error("회원가입 오류 상세:", error);
+      
+      if (error.message.includes("422") || error.message.includes("password") || error.message.includes("Password")) {
+        setPasswordError("비밀번호가 유효하지 않습니다. 다른 비밀번호를 사용해주세요. (최소 6자 이상, 숫자 포함 권장)");
+        setIsLoading(false);
+        return;
+      } else if (error.message.includes("User already registered") || error.message.includes("email") || error.message.includes("Email")) {
+        setEmailError("이미 사용 중인 이메일입니다. 다른 이메일 주소를 사용해주세요.");
+        setIsLoading(false);
+        return;
+      } else if (error.message.includes("400") || error.message.includes("Bad Request")) {
+        // 400 오류 처리
+        errorMessage = "서버에서 요청을 처리할 수 없습니다. 다른 비밀번호를 사용해보세요.";
+        setPasswordError("다른 비밀번호를 사용해보세요. 숫자와 문자를 혼합해서 사용하세요.");
+        setIsLoading(false);
+        return;
+      }
+
       toast({
         title: "회원가입 실패",
-        description: error.message || "회원가입 중 오류가 발생했습니다.",
+        description: errorMessage,
         variant: "destructive",
-      })
-      setIsLoading(false)
+      });
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleSocialLogin = async (provider: "google" | "kakao") => {
+    setIsLoading(true)
+
     const supabase = createSupabaseClient()
     if (!supabase) {
       toast({
@@ -245,10 +498,9 @@ export default function AuthForm() {
         description: "인증 서비스에 연결할 수 없습니다.",
         variant: "destructive",
       })
+      setIsLoading(false)
       return
     }
-
-    setIsLoading(true)
 
     // 15초 타임아웃 설정
     timeoutRef.current = setTimeout(() => {
@@ -272,11 +524,6 @@ export default function AuthForm() {
         },
       })
 
-      // 컴포넌트가 언마운트되었는지 확인
-      if (!isMounted.current) return
-
-      console.log(`${provider} 로그인 응답:`, { success: !error, url: data?.url })
-
       // 타임아웃 정리
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
@@ -284,26 +531,19 @@ export default function AuthForm() {
       }
 
       if (error) {
-        console.error(`${provider} 로그인 오류:`, error.message)
+        console.error(`${provider} 로그인 오류:`, error)
         throw error
       }
 
-      // OAuth 리디렉션이 자동으로 처리됨
-      console.log(`${provider} 로그인 리디렉션 URL:`, data?.url || "URL 없음")
-
-      // 리디렉션 URL이 있으면 직접 이동
-      if (data?.url) {
-        window.location.href = data.url
-      } else {
-        setIsLoading(false)
-        toast({
-          title: "소셜 로그인 오류",
-          description: "리디렉션 URL을 받지 못했습니다. 다시 시도해 주세요.",
-          variant: "destructive",
-        })
+      if (!data.url) {
+        console.error(`${provider} 로그인 URL 없음`)
+        throw new Error("소셜 로그인 URL을 가져올 수 없습니다.")
       }
+
+      // URL로 리디렉션
+      window.location.href = data.url
     } catch (error: any) {
-      console.error("Social login error:", error)
+      console.error(`${provider} 로그인 오류 처리:`, error)
 
       // 컴포넌트가 언마운트되었는지 확인
       if (!isMounted.current) return
@@ -314,29 +554,45 @@ export default function AuthForm() {
         timeoutRef.current = null
       }
 
-      setIsLoading(false)
       toast({
         title: "소셜 로그인 실패",
         description: error.message || "소셜 로그인 중 오류가 발생했습니다.",
         variant: "destructive",
       })
+      setIsLoading(false)
     }
   }
 
   return (
-    <Tabs defaultValue="login" className="w-full">
+    <Tabs defaultValue="signin" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="login">로그인</TabsTrigger>
-        <TabsTrigger value="register">회원가입</TabsTrigger>
+        <TabsTrigger value="signin">로그인</TabsTrigger>
+        <TabsTrigger value="signup">회원가입</TabsTrigger>
       </TabsList>
-      <TabsContent value="login">
+      
+      <TabsContent value="signin">
         <Card>
+          <CardHeader>
+            <CardTitle>로그인</CardTitle>
+            <CardDescription>
+              이메일과 비밀번호를 입력하여 로그인하세요.
+            </CardDescription>
+          </CardHeader>
+          
           <form onSubmit={handleSignIn}>
-            <CardHeader>
-              <CardTitle>로그인</CardTitle>
-              <CardDescription>이메일과 비밀번호를 입력하여 로그인하세요.</CardDescription>
-            </CardHeader>
             <CardContent className="space-y-4">
+              {loginError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
+                  <p>{loginError}</p>
+                </div>
+              )}
+              
+              {resetEmailSent && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-800">
+                  <p>비밀번호 재설정 이메일이 발송되었습니다. 이메일을 확인해주세요.</p>
+                </div>
+              )}
+              
               <div className="space-y-2">
                 <Label htmlFor="email">이메일</Label>
                 <Input
@@ -344,34 +600,36 @@ export default function AuthForm() {
                   type="email"
                   placeholder="your@email.com"
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value)
-                    setLoginError("")
-                  }}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading}
                 />
               </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="password">비밀번호</Label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value)
-                    setLoginError("")
-                  }}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
                 />
               </div>
-              {loginError && (
-                <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
-                  <p>{loginError}</p>
-                </div>
-              )}
+              
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={handleResetPassword}
+                  className="text-sm text-amber-600 hover:text-amber-700"
+                  disabled={isLoading}
+                >
+                  비밀번호 찾기
+                </button>
+              </div>
             </CardContent>
+            
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
@@ -382,7 +640,7 @@ export default function AuthForm() {
                   "로그인"
                 )}
               </Button>
-
+              
               <div className="relative w-full">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t" />
@@ -391,7 +649,7 @@ export default function AuthForm() {
                   <span className="bg-background px-2 text-muted-foreground">또는</span>
                 </div>
               </div>
-
+              
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   type="button"
@@ -441,13 +699,17 @@ export default function AuthForm() {
           </form>
         </Card>
       </TabsContent>
-      <TabsContent value="register">
+      
+      <TabsContent value="signup">
         <Card>
+          <CardHeader>
+            <CardTitle>회원가입</CardTitle>
+            <CardDescription>
+              새 계정을 만들고 다양한 서비스를 이용해보세요.
+            </CardDescription>
+          </CardHeader>
+          
           <form onSubmit={handleSignUp}>
-            <CardHeader>
-              <CardTitle>회원가입</CardTitle>
-              <CardDescription>새 계정을 만들어 서비스를 이용하세요.</CardDescription>
-            </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">이메일</Label>
@@ -459,8 +721,13 @@ export default function AuthForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading}
+                  className={emailError ? "border-red-500" : ""}
                 />
+                {emailError && (
+                  <p className="text-sm text-red-500">{emailError}</p>
+                )}
               </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="password">비밀번호</Label>
                 <Input
@@ -470,9 +737,14 @@ export default function AuthForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
+                  className={passwordError ? "border-red-500" : ""}
                 />
+                {passwordError && (
+                  <p className="text-sm text-red-500">{passwordError}</p>
+                )}
               </div>
             </CardContent>
+            
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
